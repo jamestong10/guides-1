@@ -1,6 +1,11 @@
 coffeescript:
+  enabled: false
+eslint:
   enabled: true
-  config_file: style/coffeescript/coffeelint.json
+  config_file: style/javascript/.eslintrc.json
+haml:
+  enabled: true
+  config_file: style/haml/haml.yml
 javascript:
   enabled: false
 jscs:
@@ -10,5 +15,7 @@ ruby:
   enabled: true
   config_file: style/ruby/.rubocop.yml
 scss:
+  enabled: false
+stylelint:
   enabled: true
-  config_file: style/sass/.scss-lint.yml
+  config_file: style/sass/.stylelintrc.json

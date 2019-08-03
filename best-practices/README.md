@@ -12,24 +12,22 @@ General
 * Don't swallow exceptions or "fail silently."
 * Don't write code that guesses at future functionality.
 * Exceptions should be exceptional.
-* [Keep the code simple].
-
-[Keep the code simple]: http://www.readability.com/~/ko2aqda2
+* Keep the code simple.
 
 Object-Oriented Design
 ----------------------
 
 * Avoid global variables.
 * Avoid long parameter lists.
-* Limit collaborators of an object (entities an object depends on).
-* Limit an object's dependencies (entities that depend on an object).
+* Limit dependencies of an object (entities an object depends on).
+* Limit an object's dependents (entities that depend on an object).
 * Prefer composition over inheritance.
 * Prefer small methods. Between one and five lines is best.
 * Prefer small classes with a single, well-defined responsibility. When a
   class exceeds 100 lines, it may be doing too many things.
 * [Tell, don't ask].
 
-[Tell, don't ask]: http://robots.thoughtbot.com/post/27572137956/tell-dont-ask
+[Tell, don't ask]: https://robots.thoughtbot.com/tell-dont-ask
 
 Ruby
 ----
@@ -53,12 +51,11 @@ Ruby Gems
 * Use [Appraisal] to test the gem against multiple versions of gem dependencies
   (such as Rails in a Rails engine).
 * Use [Bundler] to manage the gem's dependencies.
-* Use [Travis CI] for Continuous Integration, indicators showing whether GitHub
-  pull requests can be merged, and to test against multiple Ruby versions.
+* Use continuous integration (CI) to show build status within the code review
+  process and to test against multiple Ruby versions.
 
 [Appraisal]: https://github.com/thoughtbot/appraisal
 [Bundler]: http://bundler.io
-[Travis CI]: http://travis-ci.org
 
 Rails
 -----
@@ -87,8 +84,6 @@ Rails
   patch level for a project.
 * Use `_url` suffixes for named routes in mailer views and [redirects].  Use
   `_path` suffixes for named routes everywhere else.
-* Use a [class constant rather than the stringified class name][class constant in association]
-  for `class_name` options on ActiveRecord association macros.
 * Validate the associated `belongs_to` object (`user`), not the database column
   (`user_id`).
 * Use `db/seeds.rb` for data that is required in all environments.
@@ -99,7 +94,7 @@ Rails
 * Prefer `Time.zone.parse("2014-07-04 16:05:37")` over `Time.parse("2014-07-04 16:05:37")`
 * Use `ENV.fetch` for environment variables instead of `ENV[]`so that unset
   environment variables are detected on deploy.
-* [Use blocks][date-block] when declaring date and time attributes in FactoryGirl factories.
+* [Use blocks][date-block] when declaring date and time attributes in FactoryBot factories.
 * Use `touch: true` when declaring `belongs_to` relationships.
 
 [date-block]: /best-practices/samples/ruby.rb#L10
@@ -147,7 +142,7 @@ Bundler
 
 * Specify the [Ruby version] to be used on the project in the `Gemfile`.
 * Use a [pessimistic version] in the `Gemfile` for gems that follow semantic
-  versioning, such as `rspec`, `factory_girl`, and `capybara`.
+  versioning, such as `rspec`, `factory_bot`, and `capybara`.
 * Use a [versionless] `Gemfile` declarations for gems that are safe to update
   often, such as pg, thin, and debugger.
 * Use an [exact version] in the `Gemfile` for fragile gems, such as Rails.
@@ -157,29 +152,31 @@ Bundler
 [pessimistic version]: http://robots.thoughtbot.com/post/35717411108/a-healthy-bundle
 [versionless]: http://robots.thoughtbot.com/post/35717411108/a-healthy-bundle
 
-Postgres
---------
+Relational Databases
+--------------------
 
-* Avoid multicolumn indexes in Postgres. It [combines multiple indexes]
-  efficiently. Optimize later with a [compound index] if needed.
-* Consider a [partial index] for queries on booleans.
-* Constrain most columns as [`NOT NULL`].
 * [Index foreign keys].
+* Constrain most columns as [`NOT NULL`].
+* In a SQL view, only select columns you need (i.e., avoid `SELECT table.*`).
 * Use an `ORDER BY` clause on queries where the results will be displayed to a
   user, as queries without one may return results in a changing, arbitrary
   order.
 
+[Index foreign keys]: https://tomafro.net/2009/08/using-indexes-in-rails-index-your-associations
 [`NOT NULL`]: http://www.postgresql.org/docs/9.1/static/ddl-constraints.html#AEN2444
+
+Postgres
+--------
+
+* Avoid multicolumn indexes. Postgres [combines multiple indexes] efficiently.
+  Optimize later with a [compound index] if needed.
+* Consider a [partial index] for queries on booleans.
+* Avoid JSONB columns unless you have a strong reason to store an entire JSON
+  document from an external source.
+
 [combines multiple indexes]: http://www.postgresql.org/docs/9.1/static/indexes-bitmap-scans.html
 [compound index]: http://www.postgresql.org/docs/9.2/static/indexes-bitmap-scans.html
 [partial index]: http://www.postgresql.org/docs/9.1/static/indexes-partial.html
-[Index foreign keys]: https://tomafro.net/2009/08/using-indexes-in-rails-index-your-associations
-
-Background Jobs
----------------
-
-* Store IDs, not `ActiveRecord` objects for cleaner serialization, then re-find
-  the `ActiveRecord` object in the `perform` method.
 
 Email
 -----
@@ -197,47 +194,59 @@ Email
 Web
 ---
 
-* Avoid a Flash of Unstyled Text, even when no cache is available.
 * Avoid rendering delays caused by synchronous loading.
-* Use https instead of http when linking to assets.
+* Use HTTPS instead of HTTP when linking to assets.
 
 JavaScript
 ----------
+
 * Use the latest stable JavaScript syntax with a transpiler, such as [babel].
 * Include a `to_param` or `href` attribute when serializing ActiveRecord models,
   and use that when constructing URLs client side, rather than the ID.
+* Prefer `data-*` attributes over `id` and `class` attributes when targeting
+  HTML elements. #462
+* Avoid targeting HTML elements using classes intended for styling
+  purposes. #462
 
-[babel]: http://babeljs.io/
+[babel]: https://babeljs.io/
 
 HTML
 ----
 
-* Don't use a reset button for forms.
-* Prefer cancel links to cancel buttons.
 * Use `<button>` tags over `<a>` tags for actions.
 
 CSS
 ---
 
+* Document the project's CSS architecture (the README, component library or
+  style guide are good places to do this), including things such as:
+  * Organization of stylesheet directories and Sass partials
+  * Selector naming convention
+  * Code linting tools and configuration
+  * Browser support
 * Use Sass.
 * Use [Autoprefixer][autoprefixer] to generate vendor prefixes based on the
   project-specific browser support that is needed.
+* Prefer `overflow: auto` to `overflow: scroll`, because `scroll` will always
+  display scrollbars outside of macOS, even when content fits in the container.
 
 [autoprefixer]: https://github.com/postcss/autoprefixer
 
 Sass
 ----
 
-* Prefer `overflow: auto` to `overflow: scroll`, because `scroll` will always
-  display scrollbars outside of OS X, even when content fits in the container.
-* Use `image-url` and `font-url`, not `url`, so the asset pipeline will re-write
+* When using [sass-rails], use the provided [asset-helpers][asset-helpers]
+  (e.g. `image-url` and `font-url`), so that Rails' Asset Pipeline will re-write
   the correct paths to assets.
 * Prefer mixins to `@extend`.
+
+[sass-rails]: https://github.com/rails/sass-rails
+[asset-helpers]: https://github.com/rails/sass-rails#asset-helpers
 
 Browsers
 --------
 
-* Avoid supporting versions of Internet Explorer before IE10.
+* Avoid supporting versions of Internet Explorer before IE11.
 
 Objective-C
 -----------
@@ -308,6 +317,11 @@ Haskell
 * Avoid partial functions (`head`, `read`, etc).
 * Compile code with `-Wall -Werror`.
 
+Elixir
+------
+
+* Avoid macros.
+
 Ember
 -----
 
@@ -354,7 +368,6 @@ Ruby JSON APIs
 
 * Review the recommended practices outlined in Heroku's [HTTP API Design Guide]
   before designing a new API.
-* Use a fast JSON parser, e.g. [`oj`][oj]
 * Write integration tests for your API endpoints. When the primary consumer of
   the API is a JavaScript client maintained within the same code base as the
   provider of the API, write [feature specs]. Otherwise write [request specs].
